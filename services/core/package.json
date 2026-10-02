@@ -1,0 +1,12 @@
+{
+  "name": "notelkz-core",
+  "private": true,
+  "type": "module",
+  "description": "Twitch data API and Discord sync for notelkz.net. No dependencies.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --env-file-if-exists=.env --watch src/index.js",
+    "test": "node --test"
+  }
+}

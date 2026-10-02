@@ -1,0 +1,14 @@
+{
+  "name": "notelkz-site",
+  "private": true,
+  "type": "module",
+  "description": "Static site for notelkz.net",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node dev.mjs"
+  },
+  "dependencies": {
+    "marked": "^18.0.0"
+  }
+}

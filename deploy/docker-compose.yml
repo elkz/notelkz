@@ -1,0 +1,27 @@
+# The core service: Twitch API cache + Discord sync.
+# Nginx on the host serves the static site and proxies /api to this container.
+#   cd deploy && cp ../services/core/.env.example .env && nano .env
+#   docker compose up -d --build
+services:
+  core:
+    build: ../services/core
+    container_name: notelkz-core
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      STATE_FILE: /data/state.json
+    ports:
+      - "127.0.0.1:8787:8787"   # only reachable from the host (nginx), not the internet
+    volumes:
+      - core-data:/data
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+
+volumes:
+  core-data:

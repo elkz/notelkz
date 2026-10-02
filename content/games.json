@@ -1,0 +1,7 @@
+{
+  "_comment": "Games shown on the About page. 'status' is one of: playing, regular, retired. Replace these with your own.",
+  "games": [
+    { "name": "Wardogs", "status": "playing", "note": "Squad nights with Zero Lives Left." },
+    { "name": "Add a game", "status": "regular", "note": "Edit content/games.json." }
+  ]
+}

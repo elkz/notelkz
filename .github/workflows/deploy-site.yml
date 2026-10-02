@@ -1,0 +1,35 @@
+# Builds the static site and uploads it to the VPS whenever content or site code changes.
+# Repository secrets needed (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST     VPS hostname or IP
+#   DEPLOY_USER     SSH user that can write to /var/www/notelkz.net
+#   DEPLOY_SSH_KEY  private key for that user (ed25519 recommended)
+#   DEPLOY_KNOWN_HOSTS  output of: ssh-keyscan -t ed25519 your.vps.host
+name: Deploy site
+on:
+  push:
+    branches: [main]
+    paths: ['content/**', 'site/**', '.github/workflows/deploy-site.yml']
+  workflow_dispatch:
+
+concurrency: { group: deploy-site, cancel-in-progress: true }
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Build
+        working-directory: site
+        run: npm install --no-audit --no-fund && npm run build
+      - name: Upload
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          rsync -az --delete -e "ssh -i ~/.ssh/deploy" site/dist/ \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/notelkz.net/"

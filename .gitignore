@@ -1,0 +1,7 @@
+node_modules/
+site/dist/
+.env
+deploy/.env
+services/core/data/
+*.tmp
+.DS_Store
