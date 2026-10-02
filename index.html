@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>notelkz</title>
+  <meta name="description" content="notelkz — streams, schedule, projects and links.">
+  <meta name="theme-color" content="#0b0d12">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/P22Underground-Heavy.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a class="roundel roundel--small" href="#top" aria-label="Back to top">
+      <span class="roundel__ring"></span>
+      <span class="roundel__bar"><span data-bind="name"></span></span>
+    </a>
+    <nav class="line" aria-label="Sections">
+      <ol>
+        <li><a href="#live"     style="--c: var(--purple)">Live</a></li>
+        <li><a href="#schedule" style="--c: var(--yellow)">Schedule</a></li>
+        <li><a href="#about"    style="--c: var(--blue)">About</a></li>
+        <li><a href="#projects" style="--c: var(--green)">Projects</a></li>
+        <li><a href="#contact"  style="--c: var(--pink)">Contact</a></li>
+      </ol>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="roundel roundel--hero" aria-hidden="true">
+        <span class="roundel__ring"></span>
+        <span class="roundel__bar"><span data-bind="name"></span></span>
+      </div>
+      <div class="hero__text">
+        <p class="status" id="status" data-state="unknown">
+          <span class="status__dot"></span><span class="status__text">Checking…</span>
+        </p>
+        <h1 data-bind="name"></h1>
+        <p class="hero__tagline" data-bind="tagline"></p>
+        <p class="hero__intro" data-bind="intro"></p>
+        <ul class="socials" id="hero-socials"></ul>
+      </div>
+    </section>
+
+    <section class="panel" id="live" style="--c: var(--purple)">
+      <h2 class="panel__title"><span>Live</span></h2>
+      <div class="player" id="player">
+        <p class="player__fallback">Loading the stream…</p>
+      </div>
+    </section>
+
+    <section class="panel" id="schedule" style="--c: var(--yellow)">
+      <h2 class="panel__title"><span>Schedule</span></h2>
+      <ol class="board" id="board"></ol>
+    </section>
+
+    <section class="panel" id="about" style="--c: var(--blue)">
+      <h2 class="panel__title"><span>About</span></h2>
+      <div class="about">
+        <div class="about__text" id="about-text"></div>
+        <dl class="facts" id="facts"></dl>
+      </div>
+    </section>
+
+    <section class="panel" id="projects" style="--c: var(--green)">
+      <h2 class="panel__title"><span>Projects</span></h2>
+      <ul class="cards" id="cards"></ul>
+    </section>
+
+    <section class="panel" id="contact" style="--c: var(--pink)">
+      <h2 class="panel__title"><span>Contact</span></h2>
+      <p class="contact__lead">Find me here, or drop a message.</p>
+      <ul class="socials socials--big" id="contact-socials"></ul>
+      <p class="contact__email" id="email"></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span id="year"></span> <span data-bind="name"></span> · Mind the gap.</p>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
