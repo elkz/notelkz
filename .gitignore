@@ -3,3 +3,6 @@ services/core/data/
 node_modules/
 *.tmp
 .DS_Store
+
+# 4K scenes are large; regenerate with: node brand/render.mjs
+brand/backgrounds/*/scene-3840x2160.png
