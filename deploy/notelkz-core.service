@@ -1,0 +1,20 @@
+# /etc/systemd/system/notelkz-core.service
+[Unit]
+Description=notelkz core (Twitch + Last.fm API)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/var/www/notelkz/services/core
+ExecStart=/usr/bin/node --env-file=.env src/index.js
+Restart=always
+RestartSec=5
+Environment=STATE_FILE=/var/lib/notelkz/state.json
+StateDirectory=notelkz
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,7 +1,5 @@
-node_modules/
-site/dist/
 .env
-deploy/.env
 services/core/data/
+node_modules/
 *.tmp
 .DS_Store
