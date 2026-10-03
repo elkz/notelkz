@@ -14,6 +14,11 @@ export const config = {
     login: (env.TWITCH_LOGIN || 'elkz').toLowerCase(),
   },
 
+  lastfm: {
+    apiKey: env.LASTFM_API_KEY || '',
+    user: env.LASTFM_USER || 'notelkz',
+  },
+
   discord: {
     token: env.DISCORD_BOT_TOKEN || '',
     guildId: env.DISCORD_GUILD_ID || '',
@@ -33,6 +38,7 @@ export const config = {
     schedule: num(env.POLL_SCHEDULE_SECONDS, 600) * 1000,
     clips: num(env.POLL_CLIPS_SECONDS, 600) * 1000,
     videos: num(env.POLL_VIDEOS_SECONDS, 1800) * 1000,
+    music: num(env.POLL_MUSIC_SECONDS, 30) * 1000,
   },
 };
 

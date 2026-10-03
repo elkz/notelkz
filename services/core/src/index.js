@@ -11,9 +11,10 @@ import { DiscordClient } from './discord.js';
 import { createServer } from './server.js';
 import { planEventSync, applyEventPlan, planLiveTransition, planClipPosts, clipMessage } from './sync.js';
 import { EventStatus } from './discord.js';
+import { getRecentTrack } from './lastfm.js';
 
 const twitchUrl = `https://www.twitch.tv/${config.twitch.login}`;
-const cache = { status: null, schedule: null, clips: null, videos: null };
+const cache = { status: null, schedule: null, clips: null, videos: null, music: null };
 const lastRun = {};
 const lastError = {};
 const state = await loadState(config.stateFile);
@@ -133,6 +134,15 @@ const server = createServer(cache, () => ({
   lastError,
 }));
 server.listen(config.port, config.host, () => log.info(`API listening on http://${config.host}:${config.port}`));
+
+if (config.lastfm.apiKey) {
+  every('music', config.intervals.music, async () => {
+    cache.music = { configured: true, user: config.lastfm.user, ...(await getRecentTrack(config.lastfm)), updatedAt: new Date().toISOString() };
+  });
+} else {
+  cache.music = { configured: false };
+  log.warn('LASTFM_API_KEY not set: now playing is off.');
+}
 
 if (!twitch) {
   log.warn('TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET not set: serving empty data. See .env.example.');

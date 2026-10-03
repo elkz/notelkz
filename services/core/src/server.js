@@ -7,6 +7,7 @@ const routes = {
   '/api/schedule': { key: 'schedule', maxAge: 120 },
   '/api/clips': { key: 'clips', maxAge: 300 },
   '/api/videos': { key: 'videos', maxAge: 300 },
+  '/api/music': { key: 'music', maxAge: 20 },
 };
 
 export function createServer(cache, health) {

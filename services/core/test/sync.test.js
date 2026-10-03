@@ -128,3 +128,13 @@ test('Discord client waits and retries on rate limits', async () => {
   assert.deepEqual(await d.sendMessage('C', { content: 'hi' }), { id: 'M' });
   assert.deepEqual(slept, [600]);
 });
+
+import { parseRecentTrack } from '../src/lastfm.js';
+test('Last.fm: now playing and last played tracks', () => {
+  const playing = parseRecentTrack({ recenttracks: { track: [{ name: 'Song', artist: { '#text': 'Band' }, url: 'u', '@attr': { nowplaying: 'true' }, image: [{ size: 'medium', '#text': 'm.jpg' }, { size: 'large', '#text': 'l.jpg' }] }] } });
+  assert.deepEqual(playing, { nowPlaying: true, track: 'Song', artist: 'Band', url: 'u', image: 'l.jpg', playedAt: null });
+  const last = parseRecentTrack({ recenttracks: { track: [{ name: 'Old', artist: { '#text': 'Band' }, date: { uts: '1700000000' } }] } });
+  assert.equal(last.nowPlaying, false);
+  assert.equal(last.playedAt, '2023-11-14T22:13:20.000Z');
+  assert.deepEqual(parseRecentTrack({}), { track: null });
+});
