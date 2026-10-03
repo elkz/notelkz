@@ -1,0 +1,8 @@
+{
+  "_help": "mode: 'auto' follows Twitch (live, next stream, or Twitch's own vacation mode). 'holiday' forces the holiday screen. 'until' is the date you're back (YYYY-MM-DD); leave it empty if you don't know yet. 'message' is optional.",
+  "mode": "auto",
+  "holiday": {
+    "until": "",
+    "message": ""
+  }
+}
