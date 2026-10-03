@@ -1,0 +1,30 @@
+{
+  "_help": "Each section is a heading in the Setup drawer. Add, remove or reorder items freely. 'label' is the left column, 'value' the right.",
+  "sections": [
+    { "title": "PC", "items": [
+      { "label": "GPU", "value": "ASUS TUF RTX 5090" },
+      { "label": "CPU", "value": "Ryzen 9 7950X3D" },
+      { "label": "Cooler", "value": "Corsair H150i Elite" },
+      { "label": "Motherboard", "value": "ASUS Strix X670E-F" },
+      { "label": "RAM", "value": "Corsair Vengeance 32GB 6000MHz" },
+      { "label": "SSD", "value": "Samsung 980 PRO 2TB" },
+      { "label": "Case", "value": "Corsair 5000D" },
+      { "label": "PSU", "value": "Corsair RM850x" }
+    ]},
+    { "title": "Audio", "items": [
+      { "label": "Mic", "value": "Shure SM7B + Elgato Wave XLR" },
+      { "label": "Headphones", "value": "Beyerdynamic DT 770 Pro" }
+    ]},
+    { "title": "Peripherals", "items": [
+      { "label": "Keyboard", "value": "Corsair Vanguard Pro 96" },
+      { "label": "Mouse", "value": "Logitech G502 X Pro" }
+    ]},
+    { "title": "Video & streaming", "items": [
+      { "label": "Camera", "value": "Sony Alpha 6700" },
+      { "label": "Lens", "value": "E 18–135mm F3.5–5.6 OSS" },
+      { "label": "Capture card", "value": "Elgato HD60 X" },
+      { "label": "Capture card", "value": "Elgato 4K Pro" },
+      { "label": "Light", "value": "Elgato Key Light Mini" }
+    ]}
+  ]
+}

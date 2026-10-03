@@ -1,0 +1,8 @@
+{
+  "_help": "Each entry shows as a heading with a name underneath. 'note' and 'value' are optional. Leave 'entries' empty to show 'Nobody on the wall yet'.",
+  "intro": "",
+  "entries": [
+    { "title": "Top supporter", "name": "Your top supporter", "note": "Replace in data/fame.json", "value": "" },
+    { "title": "Highest donation", "name": "Name", "note": "", "value": "£0.00" }
+  ]
+}
