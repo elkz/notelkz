@@ -138,3 +138,41 @@ test('Last.fm: now playing and last played tracks', () => {
   assert.equal(last.playedAt, '2023-11-14T22:13:20.000Z');
   assert.deepEqual(parseRecentTrack({}), { track: null });
 });
+
+import { normaliseFeed, safeUrl, fetchGames } from '../src/backlogged.js';
+const FEED = 'https://backlogged.notelkz.net/api/public/elkz/games?lists=next,playing,finished&count=10';
+test('Logged & Loaded: keeps the fields the page needs, in order', () => {
+  const out = normaliseFeed({
+    user: { profile: 'https://backlogged.notelkz.net/u/elkz' },
+    lists: {
+      next: [
+        { position: 2, name: 'Second', url: 'https://backlogged.notelkz.net/games/2' },
+        { position: 1, name: '  Hades   II ', url: 'https://backlogged.notelkz.net/games/1', coverSmall: 'https://images.igdb.com/a.jpg', cover: 'https://images.igdb.com/b.jpg', releaseYear: 2025, platforms: ['PC', 'Switch'], hoursPlayed: 12.54 },
+      ],
+      playing: [],
+      finished: [{ name: 'Elden Ring', hoursPlayed: 42 }],
+    },
+    updatedAt: '2026-10-07T10:00:00.000Z',
+  }, FEED);
+  assert.equal(out.profile, 'https://backlogged.notelkz.net/u/elkz');
+  assert.deepEqual(out.lists.next.map((g) => g.name), ['Hades II', 'Second']);
+  assert.deepEqual(out.lists.next[0], { position: 1, name: 'Hades II', url: 'https://backlogged.notelkz.net/games/1', cover: 'https://images.igdb.com/a.jpg', year: 2025, platforms: ['PC', 'Switch'], hours: 12.5 });
+  assert.deepEqual(out.lists.playing, []);
+  assert.equal(out.lists.finished[0].url, null);
+});
+
+test('Logged & Loaded: unsafe links and images are dropped', () => {
+  const hosts = new Set(['backlogged.notelkz.net']);
+  assert.equal(safeUrl('javascript:alert(1)', hosts), null);
+  assert.equal(safeUrl('http://backlogged.notelkz.net/x', hosts), null);
+  assert.equal(safeUrl('https://evil.example/x', hosts), null);
+  const out = normaliseFeed({ lists: { next: [{ name: '<img src=x onerror=alert(1)>', url: 'https://evil.example/', cover: 'https://evil.example/x.jpg' }] } }, FEED);
+  assert.equal(out.lists.next[0].url, null);
+  assert.equal(out.lists.next[0].cover, null);
+  assert.equal(out.lists.next[0].name, '<img src=x onerror=alert(1)>'); // kept as plain text; the page writes it with textContent
+});
+
+test('Logged & Loaded: errors are reported, not swallowed', async () => {
+  await assert.rejects(fetchGames({ url: FEED, fetch: async () => new Response('{"error":"nope"}', { status: 404 }) }), /404/);
+  await assert.rejects(fetchGames({ url: FEED, fetch: async () => new Response('{"oops":1}') }), /no lists/);
+});

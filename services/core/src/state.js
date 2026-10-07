@@ -9,6 +9,7 @@ const empty = () => ({
   events: {},            // segmentId -> { eventId, hash, start, end }
   live: { wasLive: false, activeEventId: null },
   clips: { seededAt: null, posted: [] },
+  games: null,           // last good copy of the Logged & Loaded feed
 });
 
 export async function loadState(file) {

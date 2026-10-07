@@ -12,9 +12,10 @@ import { createServer } from './server.js';
 import { planEventSync, applyEventPlan, planLiveTransition, planClipPosts, clipMessage } from './sync.js';
 import { EventStatus } from './discord.js';
 import { getRecentTrack } from './lastfm.js';
+import { fetchGames } from './backlogged.js';
 
 const twitchUrl = `https://www.twitch.tv/${config.twitch.login}`;
-const cache = { status: null, schedule: null, clips: null, videos: null, music: null };
+const cache = { status: null, schedule: null, clips: null, videos: null, music: null, games: null };
 const lastRun = {};
 const lastError = {};
 const state = await loadState(config.stateFile);
@@ -134,6 +135,25 @@ const server = createServer(cache, () => ({
   lastError,
 }));
 server.listen(config.port, config.host, () => log.info(`API listening on http://${config.host}:${config.port}`));
+
+if (config.backlogged.url) {
+  // Start from the copy saved last time, so the drawer has games even before the first fetch.
+  if (state.games) cache.games = { ...state.games, stale: true };
+  every('games', config.intervals.games, async () => {
+    try {
+      const g = await fetchGames({ url: config.backlogged.url });
+      cache.games = { configured: true, ...g, stale: false, fetchedAt: new Date().toISOString() };
+      state.games = cache.games;
+      persist();
+    } catch (err) {
+      // Keep serving the last good copy, marked as stale.
+      if (cache.games) cache.games = { ...cache.games, stale: true };
+      throw err;
+    }
+  });
+} else {
+  cache.games = { configured: false };
+}
 
 if (config.lastfm.apiKey) {
   every('music', config.intervals.music, async () => {

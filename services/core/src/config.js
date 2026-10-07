@@ -14,6 +14,11 @@ export const config = {
     login: (env.TWITCH_LOGIN || 'elkz').toLowerCase(),
   },
 
+  // Logged & Loaded public feed for the Game Tracker. Set BACKLOGGED_FEED_URL= (empty) to turn it off.
+  backlogged: {
+    url: env.BACKLOGGED_FEED_URL ?? 'https://backlogged.notelkz.net/api/public/elkz/games?lists=next,playing,finished&count=10',
+  },
+
   lastfm: {
     apiKey: env.LASTFM_API_KEY || '',
     user: env.LASTFM_USER || 'notelkz',
@@ -39,6 +44,7 @@ export const config = {
     clips: num(env.POLL_CLIPS_SECONDS, 600) * 1000,
     videos: num(env.POLL_VIDEOS_SECONDS, 1800) * 1000,
     music: num(env.POLL_MUSIC_SECONDS, 30) * 1000,
+    games: num(env.POLL_GAMES_SECONDS, 300) * 1000,
   },
 };
 

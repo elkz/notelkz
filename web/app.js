@@ -102,8 +102,11 @@
   }
 
   /* ---------- drawers ---------- */
-  let games = [];
-  get('/data/games.json').then((g) => (games = g)).catch(() => {});
+  /* Game Tracker: served by the core service from the Logged & Loaded feed (cached, last good copy kept) */
+  const LL_PROFILE = 'https://backlogged.notelkz.net/u/elkz';
+  let GAMES = null;
+  const loadGames = () => get('/api/games').then((d) => (GAMES = d)).catch(() => { if (!GAMES) GAMES = { error: true }; });
+  loadGames();
   let SETUP = [], FAME = null;
   get('/data/setup.json').then((d) => (SETUP = d.sections || [])).catch(() => {});
   get('/data/fame.json').then((d) => (FAME = d)).catch(() => {});
@@ -111,16 +114,40 @@
     schedule: ['Schedule', () => { const list = schedule?.segments || []; if (document.body.dataset.state === 'holiday') return el('p', { class: 'empty', text: 'On a break, so nothing is scheduled right now.' });
       return list.length ? el('div', {}, list.map((x) => { const d = new Date(x.start); return el('div', { class: 'item' }, el('span', {}, el('b', { text: `${fDayS.format(d)} ${fTime.format(d)}` }), el('small', { text: fDate.format(d) })), el('span', {}, el('b', { text: x.title || 'Stream' }), el('small', { text: x.game || '' })), x.cancelled ? el('span', { class: 'tag', text: 'Cancelled' }) : null); })) : el('p', { class: 'empty', text: 'Nothing scheduled yet.' }); }],
     setup: ['Setup', () => el('div', {}, SETUP.map((sec) => [el('p', { class: 'h3', text: sec.title }), sec.items.map((it) => el('div', { class: 'item' }, el('span', { text: it.label }), el('span', { text: it.value })))]))],
-    games: ['Game Tracker', () => { const list = el('div'), F = ['All', 'Playing', 'Coming Soon', 'Beaten'];
-      const draw = (k) => list.replaceChildren(...games.filter((g) => k === 'All' || g.status === k).map((g) => el('div', { class: 'item' }, el('span', { class: 'game-name', text: g.name }), el('span', { class: `tag${g.status === 'Playing' ? ' on' : ''}`, text: g.status }))));
-      const tabs = el('div', { class: 'tabs' }, F.map((k) => { const b = el('button', { 'aria-pressed': String(k === 'All'), text: k }); b.onclick = () => { $$('button', tabs).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); draw(k); }; return b; }));
-      draw('All'); return el('div', {}, tabs, list); }],
+    games: ['Game Tracker', () => {
+      const https = (u, prefix = 'https://') => (typeof u === 'string' && u.startsWith(prefix) ? u : null);
+      const profile = https(GAMES?.profile) || LL_PROFILE;
+      const source = el('a', { class: 'gt-source', href: profile, rel: 'noopener', text: 'Tracked on Logged & Loaded' });
+      if (!GAMES || GAMES.error || GAMES.configured === false || !GAMES.lists) {
+        return el('div', {}, el('p', { class: 'empty', text: "Couldn't load the game list just now. It's on Logged & Loaded in the meantime." }), source);
+      }
+      const row = (g, ordered) => {
+        const meta = [g.year, (g.platforms || []).join(', '), g.hours != null ? `${g.hours} h played` : null].filter(Boolean).join(' · ');
+        const cover = https(g.cover, 'https://images.igdb.com/')
+          ? el('img', { class: 'gt-cover', src: g.cover, alt: '', loading: 'lazy', width: '44', height: '59' })
+          : el('span', { class: 'gt-cover', 'aria-hidden': 'true' });
+        const url = https(g.url);
+        const title = url ? el('a', { class: 'gt-title', href: url, rel: 'noopener', text: g.name }) : el('span', { class: 'gt-title', text: g.name });
+        return el('li', { class: `gt-item${ordered ? ' gt-item--ordered' : ''}` },
+          ordered ? el('span', { class: 'gt-pos', text: String(g.position) }) : null,
+          cover, el('span', { class: 'gt-text' }, title, meta ? el('small', { text: meta }) : null));
+      };
+      const section = (key, heading, ordered) => {
+        const list = GAMES.lists[key] || [];
+        return [el('p', { class: 'h3', text: heading }),
+          list.length ? el(ordered ? 'ol' : 'ul', { class: 'gt-list' }, list.map((g) => row(g, ordered))) : el('p', { class: 'gt-note', text: 'Nothing here right now.' })];
+      };
+      return el('div', {},
+        section('next', 'Up next', true), section('playing', 'Playing now', false), section('finished', 'Recently finished', false),
+        GAMES.stale ? el('p', { class: 'gt-note', text: "Logged & Loaded didn't answer just now, so this is the last saved copy." }) : null,
+        source);
+    }],
     fame: ['Wall of Fame', () => FAME && FAME.entries?.length ? el('div', {}, FAME.intro ? el('p', { class: 'empty', text: FAME.intro }) : null, FAME.entries.map((e) => [el('p', { class: 'h3', text: e.title }), el('div', { class: 'item' }, el('span', {}, el('b', { text: e.name }), e.note ? el('small', { text: e.note }) : null), e.value ? el('span', { text: e.value }) : null)])) : el('p', { class: 'empty', text: 'Nobody on the wall yet.' })],
   };
   const dr = $('.drawer'); let opener;
   const open = (k, b) => { const [t, f] = views[k]; opener = b; $('[data-dt]').textContent = t; $('[data-db]').replaceChildren(f()); dr.hidden = false; requestAnimationFrame(() => document.body.classList.add('open')); $('.x').focus(); };
   const close = () => { document.body.classList.remove('open'); setTimeout(() => (dr.hidden = true), 450); opener?.focus(); };
-  $$('[data-open]').forEach((b) => b.addEventListener('click', () => open(b.dataset.open, b)));
+  $$('[data-open]').forEach((b) => b.addEventListener('click', async () => { if (b.dataset.open === 'games') await Promise.race([loadGames(), new Promise((r) => setTimeout(r, 1500))]); open(b.dataset.open, b); }));
   $$('[data-close]').forEach((b) => b.addEventListener('click', close));
   addEventListener('keydown', (e) => e.key === 'Escape' && document.body.classList.contains('open') && close());
 
