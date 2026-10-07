@@ -139,26 +139,27 @@ test('Last.fm: now playing and last played tracks', () => {
   assert.deepEqual(parseRecentTrack({}), { track: null });
 });
 
-import { normaliseFeed, safeUrl, fetchGames } from '../src/backlogged.js';
-const FEED = 'https://backlogged.notelkz.net/api/public/elkz/games?lists=next,playing,finished&count=10';
-test('Logged & Loaded: keeps the fields the page needs, in order', () => {
-  const out = normaliseFeed({
-    user: { profile: 'https://backlogged.notelkz.net/u/elkz' },
-    lists: {
-      next: [
-        { position: 2, name: 'Second', url: 'https://backlogged.notelkz.net/games/2' },
-        { position: 1, name: '  Hades   II ', url: 'https://backlogged.notelkz.net/games/1', coverSmall: 'https://images.igdb.com/a.jpg', cover: 'https://images.igdb.com/b.jpg', releaseYear: 2025, platforms: ['PC', 'Switch'], hoursPlayed: 12.54 },
-      ],
-      playing: [],
-      finished: [{ name: 'Elden Ring', hoursPlayed: 42 }],
-    },
-    updatedAt: '2026-10-07T10:00:00.000Z',
-  }, FEED);
+import { normaliseFeed, safeUrl, fetchGames, listKey } from '../src/backlogged.js';
+const FEED = 'https://backlogged.notelkz.net/api/public/elkz/games?lists=stream-games&count=30';
+const feed = (games, extra = {}) => ({ user: { profile: 'https://backlogged.notelkz.net/u/elkz' }, lists: { 'stream-games': games }, titles: { 'stream-games': 'Stream games' }, missing: [], ...extra });
+
+test('Logged & Loaded: shows the one list named in the URL, in order, with its title', () => {
+  assert.equal(listKey(FEED), 'stream-games');
+  const out = normaliseFeed(feed([
+    { position: 2, name: 'Second', url: 'https://backlogged.notelkz.net/games/2', hoursPlayed: 0 },
+    { position: 1, name: '  Hades   II ', url: 'https://backlogged.notelkz.net/games/1', coverSmall: 'https://images.igdb.com/a.jpg', cover: 'https://images.igdb.com/b.jpg', releaseYear: 2025, platforms: ['PC', 'Switch'], hoursPlayed: 12.54 },
+  ], { titles: { 'stream-games': 'Stream games on Twitch' } }), FEED);
+  assert.equal(out.title, 'Stream games on Twitch');
   assert.equal(out.profile, 'https://backlogged.notelkz.net/u/elkz');
-  assert.deepEqual(out.lists.next.map((g) => g.name), ['Hades II', 'Second']);
-  assert.deepEqual(out.lists.next[0], { position: 1, name: 'Hades II', url: 'https://backlogged.notelkz.net/games/1', cover: 'https://images.igdb.com/a.jpg', year: 2025, platforms: ['PC', 'Switch'], hours: 12.5 });
-  assert.deepEqual(out.lists.playing, []);
-  assert.equal(out.lists.finished[0].url, null);
+  assert.deepEqual(out.games.map((g) => g.name), ['Hades II', 'Second']);
+  assert.deepEqual(out.games[0], { position: 1, name: 'Hades II', url: 'https://backlogged.notelkz.net/games/1', cover: 'https://images.igdb.com/a.jpg', year: 2025, platforms: ['PC', 'Switch'], hours: 12.5 });
+  assert.equal(out.games[1].hours, null); // 0 hours isn't shown
+});
+
+test('Logged & Loaded: a wrong or private list name is an error, not an empty list', () => {
+  assert.throws(() => normaliseFeed({ lists: {}, titles: {}, missing: ['stream-games'] }, FEED), /not found/);
+  assert.throws(() => normaliseFeed({ lists: { next: [] } }, FEED), /not found/); // older feed that ignores custom lists
+  assert.deepEqual(normaliseFeed(feed([]), FEED).games, []); // a real but empty list is fine
 });
 
 test('Logged & Loaded: unsafe links and images are dropped', () => {
@@ -166,10 +167,10 @@ test('Logged & Loaded: unsafe links and images are dropped', () => {
   assert.equal(safeUrl('javascript:alert(1)', hosts), null);
   assert.equal(safeUrl('http://backlogged.notelkz.net/x', hosts), null);
   assert.equal(safeUrl('https://evil.example/x', hosts), null);
-  const out = normaliseFeed({ lists: { next: [{ name: '<img src=x onerror=alert(1)>', url: 'https://evil.example/', cover: 'https://evil.example/x.jpg' }] } }, FEED);
-  assert.equal(out.lists.next[0].url, null);
-  assert.equal(out.lists.next[0].cover, null);
-  assert.equal(out.lists.next[0].name, '<img src=x onerror=alert(1)>'); // kept as plain text; the page writes it with textContent
+  const out = normaliseFeed(feed([{ name: '<img src=x onerror=alert(1)>', url: 'https://evil.example/', cover: 'https://evil.example/x.jpg' }]), FEED);
+  assert.equal(out.games[0].url, null);
+  assert.equal(out.games[0].cover, null);
+  assert.equal(out.games[0].name, '<img src=x onerror=alert(1)>'); // kept as plain text; the page writes it with textContent
 });
 
 test('Logged & Loaded: errors are reported, not swallowed', async () => {

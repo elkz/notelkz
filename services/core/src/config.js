@@ -14,9 +14,10 @@ export const config = {
     login: (env.TWITCH_LOGIN || 'elkz').toLowerCase(),
   },
 
-  // Logged & Loaded public feed for the Game Tracker. Set BACKLOGGED_FEED_URL= (empty) to turn it off.
+  // Logged & Loaded public feed for the Game Tracker: the list named in ?lists= (your public "Stream games" list).
+  // Set BACKLOGGED_FEED_URL= (empty) to turn it off.
   backlogged: {
-    url: env.BACKLOGGED_FEED_URL ?? 'https://backlogged.notelkz.net/api/public/elkz/games?lists=next,playing,finished&count=10',
+    url: env.BACKLOGGED_FEED_URL ?? 'https://backlogged.notelkz.net/api/public/elkz/games?lists=stream-games&count=30',
   },
 
   lastfm: {

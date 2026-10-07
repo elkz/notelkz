@@ -138,7 +138,7 @@ server.listen(config.port, config.host, () => log.info(`API listening on http://
 
 if (config.backlogged.url) {
   // Start from the copy saved last time, so the drawer has games even before the first fetch.
-  if (state.games) cache.games = { ...state.games, stale: true };
+  if (Array.isArray(state.games?.games)) cache.games = { ...state.games, stale: true };
   every('games', config.intervals.games, async () => {
     try {
       const g = await fetchGames({ url: config.backlogged.url });

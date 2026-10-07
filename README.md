@@ -16,7 +16,7 @@ deploy/              nginx config, systemd unit, update script
 ## How it works
 
 - The page asks `/api/status`, `/api/schedule` and `/api/music` every minute. The core service polls Twitch (live status every minute, schedule every 10 minutes) and Last.fm (every 30 seconds) and keeps the results in memory, so visitors never hit those APIs directly and no keys reach the browser.
-- **Game Tracker** comes from your Logged & Loaded feed. The service fetches it every 5 minutes and keeps the last good copy (also saved to disk), so the drawer never breaks if Logged & Loaded is down. Change what you track on Logged & Loaded and the site follows within about 5 minutes.
+- **Game Tracker** shows your public **Stream games** list from Logged & Loaded, in your order, under the list's own name. The service fetches it every 5 minutes and keeps the last good copy (also saved to disk), so the drawer never breaks if Logged & Loaded is down. Reorder or edit the list on Logged & Loaded and the site follows within about 5 minutes. To show a different public list, set `BACKLOGGED_FEED_URL` in `services/core/.env` (see `.env.example`). If the list is renamed or made private, the site keeps the last copy and `/api/health` says what's wrong.
 - The page picks its state by itself: **live**, **next stream** (countdown), **nothing scheduled**, or **holiday**.
 - **Holiday** turns on when your Twitch schedule is in vacation mode, or when `web/data/status.json` says `"mode": "holiday"`. Set `"until": "YYYY-MM-DD"` to show a return date and countdown; set `"mode": "auto"` to go back.
 - Optional: with Discord settings in `.env`, the service also mirrors your Twitch schedule into Discord events and posts new clips to a channel (see `services/core/.env.example`).

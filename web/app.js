@@ -118,7 +118,7 @@
       const https = (u, prefix = 'https://') => (typeof u === 'string' && u.startsWith(prefix) ? u : null);
       const profile = https(GAMES?.profile) || LL_PROFILE;
       const source = el('a', { class: 'gt-source', href: profile, rel: 'noopener', text: 'Tracked on Logged & Loaded' });
-      if (!GAMES || GAMES.error || GAMES.configured === false || !GAMES.lists) {
+      if (!GAMES || GAMES.error || GAMES.configured === false || !Array.isArray(GAMES.games)) {
         return el('div', {}, el('p', { class: 'empty', text: "Couldn't load the game list just now. It's on Logged & Loaded in the meantime." }), source);
       }
       const row = (g, ordered) => {
@@ -132,13 +132,9 @@
           ordered ? el('span', { class: 'gt-pos', text: String(g.position) }) : null,
           cover, el('span', { class: 'gt-text' }, title, meta ? el('small', { text: meta }) : null));
       };
-      const section = (key, heading, ordered) => {
-        const list = GAMES.lists[key] || [];
-        return [el('p', { class: 'h3', text: heading }),
-          list.length ? el(ordered ? 'ol' : 'ul', { class: 'gt-list' }, list.map((g) => row(g, ordered))) : el('p', { class: 'gt-note', text: 'Nothing here right now.' })];
-      };
       return el('div', {},
-        section('next', 'Up next', true), section('playing', 'Playing now', false), section('finished', 'Recently finished', false),
+        el('p', { class: 'h3', text: GAMES.title || 'Stream games' }),
+        GAMES.games.length ? el('ol', { class: 'gt-list' }, GAMES.games.map((g) => row(g, true))) : el('p', { class: 'gt-note', text: 'No games on the list right now.' }),
         GAMES.stale ? el('p', { class: 'gt-note', text: "Logged & Loaded didn't answer just now, so this is the last saved copy." }) : null,
         source);
     }],
